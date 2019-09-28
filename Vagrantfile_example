@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.require_version ">= 1.6.0"
+
+Vagrant.configure("2") do |config|
+
+  config.vm.define "NAME"
+  config.vm.box = "BOXNAME"
+  config.vm.communicator = "ssh"
+
+  config.ssh.username = "vagrant"
+  config.ssh.password = "vagrant"
+
+  config.vm.guest = :linux
+
+  config.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true
+  config.vm.network :forwarded_port, guest: 22, host: 2222, id: "ssh", auto_correct: true
+
+  config.vm.synced_folder "SYNC1", "/home/vagrant/tmpfile",mount_options: ["dmode=555,fmode=555"]
+  config.vm.synced_folder "SYNC2", "/home/vagrant/scripts"
+
+
+  config.vm.provider "docker" do |d|
+    d.image = "BOXNAME"
+    d.has_ssh = true
+    d.name = "BOXNAME" 
+  end
+
+ config.vm.provider :virtualbox do |v, override|
+   #v.gui = true
+    v.customize ["modifyvm", :id, "--memory", 2048]
+    v.customize ["modifyvm", :id, "--cpus", 2]
+    v.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
+    v.linked_clone = true
+ end
+
+end
